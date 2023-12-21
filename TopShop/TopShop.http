@@ -1,0 +1,6 @@
+@TopShop_HostAddress = http://localhost:5249
+
+GET {{TopShop_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
