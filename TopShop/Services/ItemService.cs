@@ -23,7 +23,7 @@ namespace TopShop.Services
             return await _itemRepository.Get();
         }
 
-        public ResponseItem Add(AddItem addItem)
+        public async Task<ResponseItem> Add(AddItem addItem)
         {
             Item item = new Item
             {
@@ -31,7 +31,7 @@ namespace TopShop.Services
                 Price = addItem.Price,
             };
 
-            Item result = _itemRepository.Add(item);
+            Item result = await _itemRepository.Add(item);
             ResponseItem response = new ResponseItem()
             {
                 Id = result.Id,
@@ -42,9 +42,9 @@ namespace TopShop.Services
             return response;
         }
 
-        public ResponseItem Edit(EditItem editItem, Guid id)
+        public async Task<ResponseItem> Edit(EditItem editItem, Guid id)
         {
-            if (Get(id) == null)
+            if (await Get(id) == null)
             {
                 throw new ItemNotFoundException();
             }
@@ -54,7 +54,7 @@ namespace TopShop.Services
                 Name = editItem.Name,
                 Price = editItem.Price
             };
-            var result = _itemRepository.Edit(item);
+            var result = await _itemRepository.Edit(item);
 
             var response = new ResponseItem()
             {
@@ -66,13 +66,13 @@ namespace TopShop.Services
             return response;
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
-            if (Get(id) == null)
+            if (await Get(id) == null)
             {
                 throw new ItemNotFoundException();
             }
-            _itemRepository.Delete(id);
+            await _itemRepository.Delete(id);
 
         }
     }

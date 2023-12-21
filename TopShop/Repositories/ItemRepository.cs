@@ -7,7 +7,7 @@ using TopShop.Interfaces;
 
 namespace TopShop.Repositories
 {
-    public class ItemRepository : IItemRepository
+    public class ItemRepository
     {
         private readonly IDbConnection _connection;
 
@@ -33,7 +33,7 @@ namespace TopShop.Repositories
             return await _connection.QueryAsync<Item>(sql);
         }
 
-        public Item Add(Item item)
+        public async Task<Item> Add(Item item)
         {
             string sql = "INSERT INTO items (name, price) VALUES (@Name, @Price) RETURNING id as Id, name as Name, price as Price";
             var queryObject = new
@@ -42,23 +42,17 @@ namespace TopShop.Repositories
                 price = item.Price
             };
 
-            return _connection.QuerySingle<Item>(sql, queryObject);
+            return await _connection.QuerySingleAsync<Item>(sql, queryObject);
         }
 
-        public Item Edit(Item item)
+        public async Task<Item> Edit(Item item)
         {
             string sql = "UPDATE items SET name=@Name, price=@Price WHERE id=@Id RETURNING id as Id, name as Name, price as Price";
-            //var queryObject = new
-            //{
-            //    Id = item.Id,
-            //    Name = item.Name,
-            //    Price = item.Price
-            //};
 
-            return _connection.QuerySingle<Item>(sql, item);
+            return await _connection.QuerySingleAsync<Item>(sql, item);
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
             string sql = "UPDATE items SET \"isDeleted\"=true WHERE id=@Id";
             var queryObject = new
@@ -66,7 +60,7 @@ namespace TopShop.Repositories
                 Id = id
             };
 
-            _connection.Execute(sql, queryObject);
+            await _connection.ExecuteAsync(sql, queryObject);
         }
     }
 }

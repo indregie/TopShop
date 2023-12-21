@@ -29,21 +29,21 @@ namespace TopShop.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(AddItem addItem)
+        public async Task<IActionResult> Post(AddItem addItem)
         {
-            return Ok(_itemService.Add(addItem));
+            return Ok(await _itemService.Add(addItem));
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(EditItem editItem, Guid id)
+        public async Task <IActionResult> Put(EditItem editItem, Guid id)
         {
-            return Ok(_itemService.Edit(editItem, id));
+            return Ok(await _itemService.Edit(editItem, id));
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            _itemService.Delete(id);
+            await _itemService.Delete(id);
             return Ok();
         }
 
