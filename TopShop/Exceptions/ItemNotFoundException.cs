@@ -1,7 +1,6 @@
-﻿namespace TopShop.Exceptions
+﻿namespace TopShop.Exceptions;
+
+public class ItemNotFoundException : Exception
 {
-    public class ItemNotFoundException : Exception
-    {
-        public ItemNotFoundException() : base("Item not found.") { }
-    }
+    public ItemNotFoundException() : base("Item not found.") { }
 }

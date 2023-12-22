@@ -1,13 +1,12 @@
 ﻿using TopShop.Data.Entities;
 
-namespace TopShop.Interfaces
+namespace TopShop.Interfaces;
+
+public interface IItemRepository
 {
-    public interface IItemRepository
-    {
-        Item Add(Item item);
-        void Delete(Guid id);
-        Item Edit(Item item);
-        Task<IEnumerable<Item>> Get();
-        Task<Item> Get(Guid id);
-    }
+    Task<Item?> Add(Item item);
+    Task Delete(Guid id);
+    Task<Item> Edit(Item item);
+    Task<IEnumerable<Item>> Get();
+    Task<Item?> Get(Guid id);
 }
