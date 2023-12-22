@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TopShop", "TopShop\TopShop.csproj", "{747CA46A-840A-40AB-AF69-7B8C10B06812}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TopShop.WebApi", "TopShop\TopShop.WebApi.csproj", "{747CA46A-840A-40AB-AF69-7B8C10B06812}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemTestProject", "ItemTestProject\ItemTestProject.csproj", "{9BCD8C7D-EDB1-423E-8820-049A0811D6B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TopShop.UnitTests", "ItemTestProject\TopShop.UnitTests.csproj", "{9BCD8C7D-EDB1-423E-8820-049A0811D6B2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{747CA46A-840A-40AB-AF69-7B8C10B06812} = {747CA46A-840A-40AB-AF69-7B8C10B06812}
 	EndProjectSection
