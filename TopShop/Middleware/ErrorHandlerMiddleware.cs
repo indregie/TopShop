@@ -34,8 +34,8 @@ public class ErrorHandlerMiddleware
                     // custom application error
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
-                case KeyNotFoundException e:
-                    // not found error
+                case UserNotFoundException e:
+                    // custom application error
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
                 default:

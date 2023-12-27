@@ -64,7 +64,7 @@ public class ItemServiceTests
             .With(item => item.Id, _fixture.Create<Guid>())
             .With(item => item.Name, _fixture.Create<string>())
             .With(item => item.Price, _fixture.Create<decimal>())
-            .CreateMany(2)
+            .CreateMany(22)
             .ToList();
 
         _itemRepositoryMock.Setup(m => m.Get()).ReturnsAsync(expectedList);
