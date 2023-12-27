@@ -2,31 +2,36 @@
 using TopShop.Exceptions;
 using TopShop.WebApi.Clients;
 using TopShop.WebApi.Data.Dtos;
+using TopShop.WebApi.Interfaces;
 
 namespace TopShop.WebApi.Services;
 
 public class UserService
 {
-    private readonly JsonPlaceholderClient _client;
-    public UserService(JsonPlaceholderClient client)
+    private readonly IJsonPlaceholderClient _client;
+    public UserService(IJsonPlaceholderClient client)
     {
         _client = client;
     }
 
-    public async Task<IEnumerable<UserDto>> GetUsers()
+    public async Task<IEnumerable<UserDto>> Get()
     {
-        return await _client.GetUsers();
+        return await _client.GetUsersAsync();
     }
 
-    public async Task<UserDto> GetUserById(int id)
+    public async Task<UserDto> GetById(int id)
     {
-        UserDto user = await _client.GetUserById(id) ?? throw new Exception("Failed to deserialize Json.");
-        return user;
+        var result = await _client.GetUserByIdAsync(id);
+
+        if (!result.IsSuccessful)
+            throw new Exception("user not found");
+
+        return result.Data!;
     }
 
-    public async Task<UserDto> CreateUser(UserDto user)
+    public async Task<UserDto> Create(UserDto user)
     {
-        UserDto userCreated = await _client.CreateUser(user) ?? throw new Exception();
+        UserDto userCreated = await _client.CreateUserAsync(user) ?? throw new Exception("Server error.");
         return userCreated;
     }
 }

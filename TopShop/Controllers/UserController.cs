@@ -16,21 +16,21 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> Get()
+    public async Task<IActionResult> Get()
     {
-        return Ok(await _userService.GetUsers());
+        return Ok(await _userService.Get()) ;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        return Ok(await _userService.GetUserById(id));
+        return Ok(await _userService.GetById(id));
     }
 
     [HttpPost]
-    public async Task<ActionResult> Post(UserDto user)
+    public async Task<IActionResult> Post(UserDto user)
     {
-        var userCreated = await _userService.CreateUser(user);
+        var userCreated = await _userService.Create(user);
         return Created($"https://jsonplaceholder.typicode.com/users/{userCreated.Id}", userCreated);
     }
 }

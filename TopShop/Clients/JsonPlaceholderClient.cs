@@ -1,53 +1,56 @@
 ﻿using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using TopShop.Exceptions;
 using TopShop.WebApi.Data.Dtos;
+using TopShop.WebApi.Interfaces;
 
 namespace TopShop.WebApi.Clients;
 
-public class JsonPlaceholderClient
+public class JsonPlaceholderClient : IJsonPlaceholderClient
 {
-    private readonly IHttpClientFactory _httpClient;
+    private readonly HttpClient _httpClient;
 
-    public JsonPlaceholderClient(IHttpClientFactory httpClient)
+    public JsonPlaceholderClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
 
-    public async Task<List<UserDto>> GetUsers()
+    public async Task<List<UserDto>> GetUsersAsync()
     {
-        using HttpClient client = _httpClient.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://jsonplaceholder.typicode.com/users"));
-        var response = await client.SendAsync(request);
+        var response = await _httpClient.GetAsync("https://jsonplaceholder.typicode.com/users");
         var users = await response.Content.ReadAsAsync<List<UserDto>>();
         return users;
     }
 
-    public async Task<UserDto?> GetUserById(int id)
+    public async Task<JsonPlaceholderResult<UserDto>> GetUserByIdAsync(int id)
     {
-        using HttpClient client = _httpClient.CreateClient();
-        var stringContent = new StringContent(JsonConvert.SerializeObject(new { Id = id }), Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://jsonplaceholder.typicode.com/users/{id}"));
-        var response = await client.SendAsync(request); 
-        if (response.StatusCode == HttpStatusCode.NotFound)
+        var response = await _httpClient.GetAsync($"https://jsonplaceholder.typicode.com/users/{id}");
+        if (response.IsSuccessStatusCode)
         {
-            throw new UserNotFoundException();
-        }
-        else if (!response.IsSuccessStatusCode) 
-        {
-            throw new Exception("Server error");
-        }
-        var user = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<UserDto?>(user);
+            var data = await response.Content.ReadAsAsync<UserDto>();
 
+            return new JsonPlaceholderResult<UserDto>
+            {
+                Data = data,
+                IsSuccessful = true,
+                ErrorMessage = ""
+            };
+        }
+        else
+        {
+            return new JsonPlaceholderResult<UserDto>
+            {
+                IsSuccessful = false,
+                ErrorMessage = response.StatusCode.ToString()
+            };
+        }
     }
 
-    public async Task<UserDto> CreateUser(UserDto user)
+    public async Task<UserDto> CreateUserAsync(UserDto user)
     {
-        using HttpClient client = _httpClient.CreateClient();
-        var url = new Uri($"https://jsonplaceholder.typicode.com/users/");
-        var response = await client.PostAsJsonAsync<UserDto>(url, user);
+        var response = await _httpClient.PostAsJsonAsync<UserDto>($"https://jsonplaceholder.typicode.com/users/", user);
         return user;
     }
 }

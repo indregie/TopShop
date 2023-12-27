@@ -44,8 +44,9 @@ public class ItemServiceTests
         result.Id.Should().Be(guid);
     }
 
-    [Fact]
-    public async Task Get_GivenInvalidId_ThrowsItemNotFoundException()
+    [Theory]
+    [AutoData]
+    public async Task Get_GivenInvalidId_ThrowsItemNotFoundException(int id)
     {
         //Arrange
         var guid = Guid.NewGuid();
