@@ -89,6 +89,5 @@ public class ItemService
             throw new ItemNotFoundException();
         }
         await _itemRepository.Delete(id);
-
     }
 }

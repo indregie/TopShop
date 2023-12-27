@@ -1,3 +1,5 @@
+using AutoFixture;
+using AutoFixture.Xunit2;
 using FluentAssertions;  
 using Moq;
 using System;
@@ -9,28 +11,36 @@ using TopShop.Services;
 
 namespace ItemTestProject.Services;
 
-
 public class ItemServiceTests
 {
+    private readonly Mock<IItemRepository> _itemRepositoryMock;
+    private readonly ItemService _itemService;
+    private readonly Fixture _fixture;
+
+    public ItemServiceTests()
+    {
+        _itemRepositoryMock = new Mock<IItemRepository>();
+        _itemService = new ItemService(_itemRepositoryMock.Object);
+        _fixture = new Fixture();
+    }
+
     [Fact]
+    //[AutoData]
     public async Task Get_GivenValidId_ReturnsDto()
     {
         //Arrange
-        Guid guid = new Guid();
-        Mock<IItemRepository> testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync(new Item()
-        {
-            Id = guid
-        });
+        var guid = Guid.NewGuid();
 
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
+        _itemRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync(
+            _fixture.Build<Item>()
+            .With(x => x.Id, guid)
+            .Create());
 
         //Act
-
-        ResponseItem result = await testService.Get(guid);
+        ResponseItem result = await _itemService.Get(guid);
 
         //Assert 
+        _itemRepositoryMock.Verify(x => x.Get(guid), Times.Once);
         result.Id.Should().Be(guid);
     }
 
@@ -38,40 +48,34 @@ public class ItemServiceTests
     public async Task Get_GivenInvalidId_ThrowsItemNotFoundException()
     {
         //Arrange
-        Guid guid = new Guid();
-        Mock<IItemRepository> testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync((Item?)null);
-
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
+        var guid = Guid.NewGuid();
+        _itemRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync((Item?)null);
 
         //Act Assert
-        await Assert.ThrowsAsync<ItemNotFoundException>(() => testService.Get(guid));
+        await Assert.ThrowsAsync<ItemNotFoundException>(() => _itemService.Get(guid));
+        _itemRepositoryMock.Verify(x => x.Get(guid), Times.Once);
     }
 
     [Fact]
     public async Task GetAll_ReturnsAllItems()
     {
         //Arrange
-        List<Item> expectedList = new List<Item>() 
-        {
-            new Item() { Id = Guid.NewGuid(), Name = "Milk", Price = 10.0m },
-            new Item() { Id = Guid.NewGuid(), Name = "Bread", Price = 15.0m },
-        };
-    
-        Mock<IItemRepository> testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Get()).ReturnsAsync(expectedList);
+        List<Item> expectedList = _fixture.Build<Item>()
+            .With(item => item.Id, _fixture.Create<Guid>())
+            .With(item => item.Name, _fixture.Create<string>())
+            .With(item => item.Price, _fixture.Create<decimal>())
+            .CreateMany(2)
+            .ToList();
 
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
+        _itemRepositoryMock.Setup(m => m.Get()).ReturnsAsync(expectedList);
 
         //Act
-
-        var actualList = await testService.Get();
+        var actualList = await _itemService.Get();
 
         //Assert 
-
-        Assert.Equal(expectedList, actualList);
+        _itemRepositoryMock.Verify(x => x.Get(), Times.Once);
+        actualList.Should().BeOfType<List<Item>>();
+        actualList.Should().BeEquivalentTo(expectedList);
     }
 
 
@@ -79,7 +83,7 @@ public class ItemServiceTests
     public async Task Add_GivenAddDto_ReturnsResponseDto()
     {
         //Arrange
-        var guid = new Guid();
+        var guid = Guid.NewGuid();
         AddItem addItem = new AddItem()
         {
             Name = "Test",
@@ -100,55 +104,44 @@ public class ItemServiceTests
             Price = 10.01m
         };
 
-        var testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Add(It.IsAny<Item>())).ReturnsAsync(repoItem);
-
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
+        _itemRepositoryMock.Setup(m => m.Add(It.IsAny<Item>())).ReturnsAsync(repoItem);
 
         //Act
-        ResponseItem actualResponseItem = await testService.Add(addItem);
+        ResponseItem actualResponseItem = await _itemService.Add(addItem);
 
         //Assert 
-        Assert.Equivalent(expectedResponseItem, actualResponseItem, true);
+        _itemRepositoryMock.Verify(x => x.Add(repoItem), Times.Once);
+        actualResponseItem.Should().BeEquivalentTo(expectedResponseItem);
+    }
 
+    [Fact]
+    public async Task Delete_GivenValidId_DoesNotThrowItemNotFoundException()
+    {
+        //Arrange
+        var guid = Guid.NewGuid();
+
+        _itemRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync(new Item()
+        {
+            Id = guid,
+            Name = "Chocolate",
+            Price = 1.99M
+        });
+
+        //Act Assert
+        await _itemService.Invoking(r => r.Delete(guid)).Should().NotThrowAsync<Exception>();
+        _itemRepositoryMock.Verify(x => x.Delete(guid), Times.Once);
     }
 
     [Fact]
     public async Task Delete_GivenInvalidId_ThrowsItemNotFoundException()
     {
         //Arrange
-        var guid = new Guid();
-
-        Mock<IItemRepository> testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Get(guid)).ReturnsAsync(new Item()
-        {
-            Id = guid,
-            Name = "Chocolate",
-            Price = 1.99M
-        });
-        testRepositoryMock.Setup(m => m.Delete(guid)).ReturnsAsync(1);
-
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
+        var guid = Guid.NewGuid();
+        _itemRepositoryMock.Setup(m => m.Delete(guid)).Returns(Task.FromResult<Item>(null));
 
         //Act Assert
-        await testService.Invoking(r => r.Delete(guid)).Should().NotThrowAsync<Exception>();
-    }
-
-    [Fact]
-    public async Task Delete_GivenValidId_DoNotThrowItemNotFoundException()
-    {
-        //Arrange
-        Guid guid = new Guid();
-        Mock<IItemRepository> testRepositoryMock = new Mock<IItemRepository>();
-        testRepositoryMock.Setup(m => m.Delete(guid)).Returns(Task.FromResult<Item>(null));
-
-        var testRepository = testRepositoryMock.Object;
-        var testService = new ItemService(testRepository);
-
-        //Act Assert
-        await Assert.ThrowsAsync<ItemNotFoundException>(() => testService.Get(guid));
+        await Assert.ThrowsAsync<ItemNotFoundException>(() => _itemService.Get(guid));
+        _itemRepositoryMock.Verify(x => x.Delete(guid), Times.Once);
     }
 
 }

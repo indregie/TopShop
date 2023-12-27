@@ -11,9 +11,9 @@ public class ItemController : Controller
 {
     private ItemService _itemService;
 
-    public ItemController(ItemService itemservice)
+    public ItemController(ItemService itemService)
     {
-        _itemService = itemservice;
+        _itemService = itemService;
     }
 
     [HttpGet("{id}")]

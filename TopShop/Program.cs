@@ -4,6 +4,8 @@ using TopShop.Interfaces;
 using TopShop.Middleware;
 using TopShop.Repositories;
 using TopShop.Services;
+using TopShop.WebApi.Clients;
+using TopShop.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +16,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<ItemService>();
+builder.Services.AddScoped<JsonPlaceholderClient>();
+builder.Services.AddScoped<UserService>();
 var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
 builder.Services.AddScoped<IDbConnection>(sp => new NpgsqlConnection(connectionString));
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
