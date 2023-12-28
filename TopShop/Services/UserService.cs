@@ -21,7 +21,7 @@ public class UserService
 
     public async Task<UserDto> GetById(int id)
     {
-        var result = await _client.GetUserByIdAsync(id);
+        JsonPlaceholderResult<UserDto> result = await _client.GetUserByIdAsync(id);
 
         if (!result.IsSuccessful)
             throw new Exception("user not found");
@@ -31,7 +31,11 @@ public class UserService
 
     public async Task<UserDto> Create(UserDto user)
     {
-        UserDto userCreated = await _client.CreateUserAsync(user) ?? throw new Exception("Server error.");
-        return userCreated;
+        JsonPlaceholderResult<UserDto> result = await _client.CreateUserAsync(user);
+
+        if (!result.IsSuccessful)
+            throw new Exception("user not found");
+
+        return result.Data!;
     }
 }

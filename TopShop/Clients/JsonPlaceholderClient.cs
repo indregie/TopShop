@@ -48,9 +48,27 @@ public class JsonPlaceholderClient : IJsonPlaceholderClient
         }
     }
 
-    public async Task<UserDto> CreateUserAsync(UserDto user)
+    public async Task<JsonPlaceholderResult<UserDto>> CreateUserAsync(UserDto user)
     {
         var response = await _httpClient.PostAsJsonAsync<UserDto>($"https://jsonplaceholder.typicode.com/users/", user);
-        return user;
+        if (response.IsSuccessStatusCode)
+        {
+            var data = await response.Content.ReadAsAsync<UserDto>();
+
+            return new JsonPlaceholderResult<UserDto>
+            {
+                Data = data,
+                IsSuccessful = true,
+                ErrorMessage = ""
+            };
+        }
+        else
+        {
+            return new JsonPlaceholderResult<UserDto>
+            {
+                IsSuccessful = false,
+                ErrorMessage = response.StatusCode.ToString()
+            };
+        }
     }
 }
