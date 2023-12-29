@@ -21,49 +21,88 @@ namespace Application.Services
             {
                 Id = id
             };
+
             Shop result = await _shopRepository.Get(id);
             if (result == null)
             {
-                throw new ItemNotFoundException();
+                throw new ShopNotFoundException();
             }
+
             ResponseShopDto response = new ResponseShopDto()
             {
                 Id = result.Id,
                 Name = result.Name,
                 Address = result.Address
             };
+
             return response;
         }
 
         public async Task<IEnumerable<ResponseShopDto>> Get()
         {
             IEnumerable<Shop> shops = await _shopRepository.Get();
-            IEnumerable<ResponseShopDto> responseShops = shops.Select(shop => new ResponseShopDto
+            IEnumerable<ResponseShopDto> responseShops = shops
+                .Select(shop => new ResponseShopDto
             {
                 Id = shop.Id,
                 Name = shop.Name,
                 Address = shop.Address
             });
+
             return responseShops;
         }
 
-        public async Task<ResponseShopDto> Add(AddItem addItem)
+        public async Task<ResponseShopDto> Add(AddShopDto addShop)
         {
-            Item item = new Item()
+            Shop shop = new Shop()
             {
-                Name = addItem.Name,
-                Price = addItem.Price,
+                Name = addShop.Name,
+                Address = addShop.Address
             };
 
-            Item result = await _itemRepository.Add(item) ?? throw new Exception();
+            Shop result = await _shopRepository.Add(shop) ?? throw new Exception();
             ResponseShopDto response = new ResponseShopDto()
             {
                 Id = result.Id,
                 Name = result.Name,
-                Price = result.Price
+                Address = result.Address
             };
 
             return response;
+        }
+
+        public async Task<ResponseShopDto> Edit(EditShopDto editShop, Guid id)
+        {
+            if (await Get(id) == null)
+            {
+                throw new ShopNotFoundException();
+            }
+
+            Shop shop = new Shop()
+            {
+                Id = id,
+                Name = editShop.Name,
+                Address = editShop.Address
+            };
+            Shop result = await _shopRepository.Edit(shop);
+
+            ResponseShopDto response = new ResponseShopDto()
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Address = result.Address
+            };
+
+            return response;
+        }
+
+        public async Task Delete(Guid id)
+        {
+            if (await Get(id) == null)
+            {
+                throw new ShopNotFoundException();
+            }
+            await _shopRepository.Delete(id);
         }
 
     }

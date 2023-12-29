@@ -2,16 +2,22 @@
 using Domain.Data.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Infrastructure.Repositories;
 
 namespace Domain.Services;
 
 public class ItemService
 {
     private readonly IItemRepository _itemRepository;
+    private readonly IShopRepository _shopRepository;
+    private readonly IJsonPlaceholderClient _userRepository;
 
-    public ItemService(IItemRepository itemRepository)
+    public ItemService(IItemRepository itemRepository, IShopRepository shopRepository, 
+        IJsonPlaceholderClient userRepository)
     {
         _itemRepository = itemRepository;
+        _shopRepository = shopRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<ResponseItem> Get(Guid id)
@@ -37,7 +43,8 @@ public class ItemService
     public async Task<IEnumerable<ResponseItem>> Get()
     {
         IEnumerable<Item> items = await _itemRepository.Get();
-        IEnumerable<ResponseItem> responseItems = items.Select(item => new ResponseItem
+        IEnumerable<ResponseItem> responseItems = items
+            .Select(item => new ResponseItem
         {
             Id = item.Id,
             Name = item.Name,
@@ -96,5 +103,63 @@ public class ItemService
             throw new ItemNotFoundException();
         }
         await _itemRepository.Delete(id);
+    }
+
+    public async Task<ResponseItemShopDto> AssignToShop(AssignToShopDto shop, Guid itemId)
+    {
+        if (await Get(itemId) == null)
+        {
+            throw new ItemNotFoundException();
+        }
+        if (await _shopRepository.Get(shop.ShopId) == null)
+        {
+            throw new ShopNotFoundException();
+        }
+        Item item = new Item()
+        {
+            Id = itemId,
+            ShopId = shop.ShopId
+        };
+
+        Item result = await _itemRepository.AssignToShop(item);
+
+        ResponseItemShopDto response = new () 
+        {
+            Id = result.Id,
+            Name = result.Name,
+            Price = result.Price,
+            ShopId = shop.ShopId
+        };
+
+        return response;
+    }
+
+    public async Task<ResponseItemUserDto> AssignToUser(AssignToUserDto user, Guid itemId)
+    {
+        if (await Get(itemId) == null)
+        {
+            throw new ItemNotFoundException();
+        }
+        if (await _userRepository.GetUserByIdAsync(user.UserId) == null)
+        {
+            throw new UserNotFoundException();
+        }
+        Item item = new Item()
+        {
+            Id = itemId,
+            UserId = user.UserId
+        };
+
+        Item result = await _itemRepository.AssignToUser(item);
+
+        ResponseItemUserDto response = new()
+        {
+            Id = result.Id,
+            Name = result.Name,
+            Price = result.Price,
+            UserId = user.UserId
+        };
+
+        return response;
     }
 }

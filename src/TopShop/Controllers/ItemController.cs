@@ -28,13 +28,13 @@ public class ItemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(AddItem addItem)
+    public async Task<IActionResult> Add(AddItem addItem)
     {
         return Ok(await _itemService.Add(addItem));
     }
 
     [HttpPut("{id}")]
-    public async Task <IActionResult> Put(EditItem editItem, Guid id)
+    public async Task <IActionResult> Update(EditItem editItem, Guid id)
     {
         return Ok(await _itemService.Edit(editItem, id));
     }
@@ -43,7 +43,18 @@ public class ItemController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         await _itemService.Delete(id);
-        return Ok();
+        return NoContent();
     }
 
+    [HttpPut("{id}/assign-shop")]
+    public async Task<IActionResult> AssignToShop([FromBody] AssignToShopDto shop, [FromRoute] Guid id)
+    {
+        return Ok(await _itemService.AssignToShop(shop, id));
+    }
+
+    [HttpPut("{id}/assign-user")]
+    public async Task<IActionResult> AssignToUser([FromBody] AssignToUserDto user, [FromRoute] Guid id)
+    {
+        return Ok(await _itemService.AssignToUser(user, id));
+    }
 }

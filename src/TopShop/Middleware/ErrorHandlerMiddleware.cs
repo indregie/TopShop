@@ -38,6 +38,10 @@ public class ErrorHandlerMiddleware
                     // custom application error
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
+                case ShopNotFoundException e:
+                    // custom application error
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
                 default:
                     // unhandled error
                     _logger.LogError(error, error.Message);

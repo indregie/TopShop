@@ -27,7 +27,7 @@ public class ItemRepository : IItemRepository
 
     public async Task<IEnumerable<Item>> Get()
     {
-        string sql = "SELECT * FROM public.items WHERE \"isDeleted\"=false";
+        string sql = "SELECT * FROM public.items WHERE \"isDeleted\" = false";
         return await _connection.QueryAsync<Item>(sql);
     }
 
@@ -45,19 +45,43 @@ public class ItemRepository : IItemRepository
 
     public async Task<Item> Edit(Item item)
     {
-        string sql = "UPDATE items SET name=@Name, price=@Price WHERE id=@Id RETURNING id as Id, name as Name, price as Price";
+        string sql = "UPDATE items SET name = @Name, price=@Price WHERE id = @Id RETURNING id as Id, name as Name, price as Price";
 
         return await _connection.QuerySingleAsync<Item>(sql, item);
     }
 
     public async Task Delete(Guid id)
     {
-        string sql = "UPDATE items SET \"isDeleted\"=true WHERE id=@Id";
+        string sql = "UPDATE items SET \"isDeleted\" = true WHERE id=@Id";
         var queryObject = new
         {
             Id = id
         };
 
         await _connection.ExecuteAsync(sql, queryObject);
+    }
+
+    public async Task<Item> AssignToShop(Item item)
+    {
+        string sql = "UPDATE items SET shop_id = @shopId WHERE id = @Id RETURNING id as Id, name as Name, price as Price, shop_id as ShopId";
+        var queryObject = new
+        {
+            ShopId = item.ShopId,
+            Id = item.Id
+        };
+
+        return await _connection.QuerySingleAsync<Item>(sql, queryObject);
+    }
+
+    public async Task<Item> AssignToUser(Item item)
+    {
+        string sql = "UPDATE items SET user_id = @userId WHERE id = @Id RETURNING id as Id, name as Name, price as Price, user_id as UserId";
+        var queryObject = new
+        {
+            UserId = item.UserId,
+            Id = item.Id
+        };
+
+        return await _connection.QuerySingleAsync<Item>(sql, queryObject);
     }
 }

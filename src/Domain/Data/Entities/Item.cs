@@ -16,6 +16,7 @@ public class Item
 
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
-    public Guid ShopId { get; set; }   
+    public Guid ShopId { get; set; } 
+    public int UserId { get; set; }
 
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Data.Entities;
+﻿using Domain.Data.Dtos;
+using Domain.Data.Entities;
 
 namespace Infrastructure.Repositories;
 
